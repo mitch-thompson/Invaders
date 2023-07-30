@@ -18,8 +18,8 @@ jobs:
       - run:
           name: Install X11 development packages
           command: |
-            apt-get update
-            apt-get install -y libgl1-mesa-dev xorg-dev libglu1-mesa-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxinerama1 libxkbcommon-dev libxkbcommon-x11-dev libx11-dev libxxf86vm-dev libasound2-dev libpulse-dev libxss-dev
+            sudo apt-get update
+            sudo apt-get install -y libgl1-mesa-dev xorg-dev libglu1-mesa-dev libxi-dev libxcursor-dev libxrandr-dev libxinerama-dev libxinerama1 libxkbcommon-dev libxkbcommon-x11-dev libx11-dev libxxf86vm-dev libasound2-dev libpulse-dev libxss-dev
       - checkout
       - restore_cache:
           keys:
