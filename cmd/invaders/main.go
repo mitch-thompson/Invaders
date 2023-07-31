@@ -1,26 +1,19 @@
 package main
 
 import (
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 	"invaders/pkg/render"
 )
 
 func main() {
 	goInvaders := app.New()
 	goInvadersWindow := goInvaders.NewWindow("Go Invaders")
+	goInvadersWindow.Resize(fyne.NewSize(640, 480))
+	gameCanvas := render.NewCanvas(640, 480)
 
-	gameCanvas := render.NewCanvas()
-	startButton := widget.NewButton("Start", func() {
-		//todo
-	})
-
-	gameLayout := container.NewVBox(
-		gameCanvas.Canvas,
-		startButton,
-	)
-
-	goInvadersWindow.SetContent(gameLayout)
+	gameLayout := container.NewVBox()
+	gameCanvas.RenderMain(goInvadersWindow, gameLayout)
 	goInvadersWindow.ShowAndRun()
 }
