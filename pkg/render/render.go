@@ -11,6 +11,12 @@ import (
 	"image/color"
 )
 
+const (
+	SPRITE_SIZE = float32(26) //todo move to configuration file
+	BLOCK_SIZE  = float32(40)
+	MARGIN_SIZE = float32(5)
+)
+
 // Canvas represents the game canvas that encapsulates the Fyne canvas and related functionalities.
 type Canvas struct {
 	Canvas fyne.CanvasObject
@@ -46,14 +52,16 @@ func calculateButtonSize(windowSize fyne.Size) fyne.Size {
 // RenderMain draws the main screen
 func (c *Canvas) RenderMain(window fyne.Window, gameLayout *fyne.Container) {
 	startButton := widget.NewButton("Start", func() {
-		c.RenderGame(gameLayout, window)
+		blankRect := canvas.NewRectangle(color.Black)
+		blankRect.Resize(fyne.NewSize(640, 480))
+		gameBoard := NewEmptyGameBoard()
+		c.RenderGame(gameLayout, window, blankRect)
+		c.generatePlayer(blankRect, gameBoard)
+		c.generateAliens(blankRect, gameBoard)
 	})
 	scoresButton := widget.NewButton("Scores", func() {
 		// TODO: Handle scores button click
 	})
-	startButton.OnTapped = func() {
-		c.RenderGame(gameLayout, window)
-	}
 
 	buttonsContainer := container.NewHBox(startButton, scoresButton)
 	buttonsContainer.Layout = layout.NewHBoxLayout()
@@ -65,10 +73,9 @@ func (c *Canvas) RenderMain(window fyne.Window, gameLayout *fyne.Container) {
 	window.SetContent(gameLayout)
 }
 
-// gameSetup draws the canvas for the game to start
-func (c *Canvas) gameSetup(board *canvas.Rectangle) {
-	gameboard := NewEmptyGameBoard()
-
+// generatePlayer creates a DEFENDER sprite in the middle of the bottom of the GameBoard
+func (c *Canvas) generatePlayer(board *canvas.Rectangle, gameBoard *GameBoard) {
+	image := canvas.NewImageFromFile(DEFENDER)
 	width := board.Size().Width
 	height := board.Size().Height
 
@@ -76,28 +83,39 @@ func (c *Canvas) gameSetup(board *canvas.Rectangle) {
 	if err != nil {
 		//todo
 	}
-	image := canvas.NewImageFromFile(player.path)
 	image.FillMode = canvas.ImageFillOriginal
-	image.Resize(fyne.NewSize(26, 26))
-	gameObject := NewGameObject(player, width/2, height-30, false, false)
+	image.Resize(fyne.NewSize(SPRITE_SIZE, SPRITE_SIZE))
+	gameObject := NewGameObject(player, width/2, height-40, false, false)
 	image.Move(fyne.NewPos(gameObject.x-13, gameObject.y))
 	gameObject.canvasObject = image
-	gameboard.gameObjects = append(gameboard.gameObjects, gameObject)
+	gameBoard.gameObjects = append(gameBoard.gameObjects, gameObject)
 
 	c.Canvas.(*fyne.Container).Add(image)
+}
 
+// generateAliens creates 10x5 aliens at the top of the GameBoard
+func (c *Canvas) generateAliens(board *canvas.Rectangle, gameboard *GameBoard) {
+	image := canvas.NewImageFromFile(ALIEN)
+	width := board.Size().Width
+	height := board.Size().Height
+	alien, err := NewSprite(ALIEN)
+	if err != nil {
+		//todo
+	}
+
+	gameObject := NewGameObject(alien, width, height, true, false)
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 10; j++ {
-			var y float32 = float32(i)*40 + 5
-			var x float32 = float32(j)*40 + 5
-			alien, err := NewSprite(ALIEN)
-			if err != nil {
-				//todo
+			isBottom := false
+			if i == 4 {
+				isBottom = true
 			}
+			var y float32 = float32(i)*BLOCK_SIZE + MARGIN_SIZE
+			var x float32 = float32(j)*BLOCK_SIZE + MARGIN_SIZE
+			gameObject = NewGameObject(alien, x, y, true, isBottom)
 			image = canvas.NewImageFromFile(alien.path)
 			image.FillMode = canvas.ImageFillOriginal
-			image.Resize(fyne.NewSize(26, 26))
-			gameObject = NewGameObject(alien, x, y, true, false)
+			image.Resize(fyne.NewSize(SPRITE_SIZE, SPRITE_SIZE))
 			image.Move(fyne.NewPos(gameObject.x, gameObject.y))
 			gameObject.canvasObject = image
 			gameboard.gameObjects = append(gameboard.gameObjects, gameObject)
@@ -138,12 +156,8 @@ func (c *Canvas) moveAliensDown(g *GameBoard) {
 
 // RenderGame is a method of the Canvas type used to render the game graphics.
 // todo Implement game rendering logic here.
-func (c *Canvas) RenderGame(gameLayout *fyne.Container, window fyne.Window) {
+func (c *Canvas) RenderGame(gameLayout *fyne.Container, window fyne.Window, blankRect *canvas.Rectangle) {
 	gameLayout.Objects = nil
-
-	blankRect := canvas.NewRectangle(color.Black)
-	//original game size is 224x256
-	blankRect.Resize(fyne.NewSize(640, 480))
 
 	backButton := widget.NewButton("<-", func() {
 		c.RenderMain(window, gameLayout)
@@ -162,7 +176,6 @@ func (c *Canvas) RenderGame(gameLayout *fyne.Container, window fyne.Window) {
 	c.Canvas.Refresh()
 
 	gameLayout.Refresh()
-	c.gameSetup(blankRect)
 }
 
 // HandleInput is a method of the Canvas type used to handle user input events.
