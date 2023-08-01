@@ -16,3 +16,8 @@ sudo dnf install mesa-libGL-devel libXcursor-devel libXrandr-devel libXinerama-d
 ```
 ### MacOS
 Xcode needs to be installed.
+
+## Image Sources
+
+https://github.com/MariaLetta/free-gophers-pack/
+https://pixabay.com/illustrations/ufo-spaceship-isolated-2718088/
