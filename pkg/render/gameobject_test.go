@@ -19,7 +19,7 @@ func TestNewDefender(t *testing.T) {
 }
 
 func TestNewAlien(t *testing.T) {
-	want := Alien{
+	want := &Alien{
 		GameObject: GameObject{
 			path:     ALIEN,
 			position: Position{0, 0},
